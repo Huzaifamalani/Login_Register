@@ -17,7 +17,7 @@ class _ResetState extends State<Reset> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent,elevation: 0,title: Text("Reset Password",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.white),),),
+      appBar: AppBar(backgroundColor: Colors.transparent,elevation: 0,title:  Text("Forget Password",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold,color: Colors.white),),),
       backgroundColor: const Color.fromARGB(255, 10, 45, 161),
       body: Center(
         child: Container(
@@ -36,7 +36,7 @@ class _ResetState extends State<Reset> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(50))),
                               child: const Text(
-                                "Reset Password",
+                                "forget Password",
                                 style:
                                     TextStyle(color: Colors.white, fontSize: 16,fontWeight: FontWeight.w900),
                               ),
@@ -46,11 +46,6 @@ class _ResetState extends State<Reset> {
                                 }
                                 ).onError((error, stackTrace){
                                   Utils().toastMessage(error.toString());
-                                  Navigator.pop(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) =>  Login(),
-                                  ),);
                                 });
                                 
                               },

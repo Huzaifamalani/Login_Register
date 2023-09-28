@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:app/home.dart';
 import 'package:app/register.dart';
 import 'package:app/reset_password.dart';
+import 'package:app/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -38,10 +39,15 @@ void login() async {
   );
 
         }
-      } on FirebaseAuthException catch(ex) {
-        log(ex.code.toString());
-      }
+      } on FirebaseAuthException catch (e) {
+  if (e.code == 'user-not-found') {
+  Utils().toastMessage("no user found for that email");
+  } else if (e.code == 'wrong-password') {
+    Utils().toastMessage("wrong password provided for user");
+  }
     }
+    }
+
     emailController.clear();
     passwordController.clear();
   }  // bool emailvalid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/?=^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value);
@@ -67,9 +73,9 @@ void login() async {
               padding: EdgeInsets.all(12),
               child: Column(
                children: [
-                 TextField(keyboardType: TextInputType.emailAddress,controller: emailController,decoration: InputDecoration(filled: true, fillColor: Colors.white,hintText: "Enter your email",prefixIcon: Icon(Icons.email),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),),),
+                 TextFormField(keyboardType: TextInputType.emailAddress,controller: emailController,decoration: InputDecoration(filled: true, fillColor: Colors.white,hintText: "Enter your email",prefixIcon: Icon(Icons.email),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),),),
                             Container(height: 15,),
-                                  TextField(obscureText: passwordObscured,keyboardType: TextInputType.emailAddress,controller: passwordController,decoration: InputDecoration( filled: true, fillColor: Colors.white,hintText: "Password",prefixIcon: Icon(Icons.password),suffixIcon: IconButton(onPressed: (){setState(() {
+                                  TextFormField(obscureText: passwordObscured,keyboardType: TextInputType.emailAddress,controller: passwordController,decoration: InputDecoration( filled: true, fillColor: Colors.white,hintText: "Password",prefixIcon: Icon(Icons.password),suffixIcon: IconButton(onPressed: (){setState(() {
               passwordObscured = !passwordObscured;
             });}, icon: Icon(passwordObscured? Icons.visibility_off : Icons.visibility)),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),)),
                         Container(
@@ -104,6 +110,13 @@ void login() async {
                             ),
                             onPressed: () {
                               login();
+                              FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text,password: passwordController.text).then((value) {
+                                  Utils().toastMessage("sign in Sucessfull");
+                                }
+                                ).onError((error, stackTrace){
+                                  Utils().toastMessage("no user found for that email");
+                                });
+
                             },
                           ),
                         ),
