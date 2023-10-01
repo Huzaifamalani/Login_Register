@@ -1,4 +1,5 @@
 import 'package:app/login.dart';
+import 'package:app/register.dart';
 import 'package:app/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,7 +13,8 @@ class Reset extends StatefulWidget {
 }
 
 class _ResetState extends State<Reset> {
-  final auth = FirebaseAuth.instance; 
+  final auth = FirebaseAuth.instance;
+  final   fromkey = GlobalKey<FormState>(); 
   TextEditingController emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,9 @@ class _ResetState extends State<Reset> {
           child: Column(
             children: [
               Padding(padding: EdgeInsets.all(50)),
-               TextField(controller: emailController,keyboardType: TextInputType.emailAddress,decoration: InputDecoration(filled: true, fillColor: Colors.white,hintText: "Enter Email Id",prefixIcon: Icon(Icons.person),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),),),
+               Form(
+                key: fromkey,
+                 child: TextFormField(autofocus: false ,controller: emailController,keyboardType: TextInputType.emailAddress,decoration: InputDecoration(filled: true, fillColor: Colors.white,hintText: "Enter Email Id",prefixIcon: Icon(Icons.person),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),),),),
                           const SizedBox(height: 15,),
               SizedBox(width: 350, child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -47,10 +51,24 @@ class _ResetState extends State<Reset> {
                                 ).onError((error, stackTrace){
                                   Utils().toastMessage(error.toString());
                                 });
-                                
                               },
                             ),
                           ),
+                                                  const SizedBox(
+                          height: 1,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Already have an account?",style: TextStyle(color: Colors.black,fontSize: 14),),
+                            TextButton(onPressed: (){Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) => const Register(),
+                                  ),);}, child: Text("Create Account",style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),))
+                          ],
+                        ),
+
 
             ],
           ),

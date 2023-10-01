@@ -17,40 +17,43 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  
+  final _fornkey = GlobalKey<FormState>();
+  String user ="",email = "",password = "";
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool passwordObscured = true;
-void login() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    if(email == "" || password == "") {
-      log("Please fill all the fields!");
-    }
-    else {
-
+    void SigninAccount() async {
+    if (password != null) {
       try {
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
-        if(userCredential.user != null) {
-            Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const Home()),
-  );
-
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(
+          "Sigin Sucessfully",style: TextStyle(fontSize: 20),
+        ),
+        ),
+        );
+        // ignore: use_build_context_synchronously
+        Navigator.push(context, MaterialPageRoute(builder: (context)=> const Home()));
         }
-      } on FirebaseAuthException catch (e) {
-  if (e.code == 'user-not-found') {
-  Utils().toastMessage("no user found for that email");
-  } else if (e.code == 'wrong-password') {
-    Utils().toastMessage("wrong password provided for user");
-  }
-    }
-    }
+        on FirebaseAuthException catch (e) {
+          if (e.code =="User not found") {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              backgroundColor: Colors.orangeAccent,
+              content: Text("No user found for that Email",style: TextStyle(fontSize: 20),),
+            ),
+            );
+          }
+          else if (e.code =="Wrong Password") {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              backgroundColor: Colors.orangeAccent,
+              content: Text("Wrong password provided by user",style: TextStyle(fontSize: 20),),
+            ));
+          }
+        }
+        }
+        }
 
-    emailController.clear();
-    passwordController.clear();
-  }  // bool emailvalid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/?=^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value);
   @override
   
   Widget build(BuildContext context) {
@@ -71,72 +74,87 @@ void login() async {
              Container(
               width: 350,
               padding: EdgeInsets.all(12),
-              child: Column(
-               children: [
-                 TextFormField(keyboardType: TextInputType.emailAddress,controller: emailController,decoration: InputDecoration(filled: true, fillColor: Colors.white,hintText: "Enter your email",prefixIcon: Icon(Icons.email),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),),),
-                            Container(height: 15,),
-                                  TextFormField(obscureText: passwordObscured,keyboardType: TextInputType.emailAddress,controller: passwordController,decoration: InputDecoration( filled: true, fillColor: Colors.white,hintText: "Password",prefixIcon: Icon(Icons.password),suffixIcon: IconButton(onPressed: (){setState(() {
-              passwordObscured = !passwordObscured;
-            });}, icon: Icon(passwordObscured? Icons.visibility_off : Icons.visibility)),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),)),
-                        Container(
-              width: MediaQuery.of(context).size.width,
-              height: 35,
-              alignment: Alignment.bottomRight,
-              child: TextButton(
-                onPressed: (){
-                  Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) => const Reset(),
-                                  ),);
-                }, child: const Text(
-                  "forget password",
-                  style: TextStyle(color: Colors.white),
-                  textAlign: TextAlign.right,
+              child: Form(
+                key: _fornkey,
+                child: Column(
+                 children: [
+                   TextFormField(
+                    validator:(value) {
+                    if (value == null || value.isEmpty) {
+                      return "PLease Enter Email";
+                    }
+                    return null;},keyboardType: TextInputType.emailAddress,controller: emailController,decoration: InputDecoration(filled: true, fillColor: Colors.white,hintText: "Enter your email",prefixIcon: Icon(Icons.email),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),),
+                    ),
+                              Container(height: 15,),
+                                    TextFormField(
+                                      validator:(value) {
+                    if (value == null || value.isEmpty) {
+                      return "PLease Enter password";
+                    }
+                    return null;},
+                                      obscureText: passwordObscured,keyboardType: TextInputType.emailAddress,controller: passwordController,decoration: InputDecoration( filled: true, fillColor: Colors.white,hintText: "Password",prefixIcon: Icon(Icons.password),suffixIcon: IconButton(onPressed: (){setState(() {
+                passwordObscured = !passwordObscured;
+                          });}, icon: Icon(passwordObscured? Icons.visibility_off : Icons.visibility)),border:OutlineInputBorder(borderSide:BorderSide.none,borderRadius: BorderRadius.all(Radius.circular(50)),),)),
+                          Container(
+                width: MediaQuery.of(context).size.width,
+                height: 35,
+                alignment: Alignment.bottomRight,
+                child: TextButton(
+                  onPressed: (){
+                    Navigator.push(
+                                  context,
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) => const Reset(),
+                                    ),);
+                  }, child: const Text(
+                    "forget password",
+                    style: TextStyle(color: Colors.white),
+                    textAlign: TextAlign.right,
+                    ),
                   ),
-                ),
-            ),
-            SizedBox(width: 350, child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: const Size.square(50),
-                              backgroundColor: Colors.black,
-                              elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50))),
-                            child: const Text(
-                              "Sign in",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.w900),
-                            ),
-                            onPressed: () {
-                              login();
-                              FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text,password: passwordController.text).then((value) {
-                                  Utils().toastMessage("sign in Sucessfull");
-                                }
-                                ).onError((error, stackTrace){
-                                  Utils().toastMessage("no user found for that email");
-                                });
-
-                            },
                           ),
-                        ),
-                        const SizedBox(
-                          height: 1,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Already have an account?",style: TextStyle(color: Colors.black,fontSize: 14),),
-                            TextButton(onPressed: (){Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) => const Register(),
-                                  ),);}, child: Text("Register now",style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),))
-                          ],
-                        ),
- 
-            
-],),
+                          SizedBox(width: 350, child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size.square(50),
+                                backgroundColor: Colors.black,
+                                elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50))),
+                              child: const Text(
+                                "Sign in",
+                                style:
+                                    TextStyle(color: Colors.white, fontSize: 20,fontWeight: FontWeight.w900),
+                              ),
+                                onPressed: () async{
+                                if (_fornkey.currentState!.validate()) {
+                                  setState(() {
+                                  email = emailController.text;
+                                  password = passwordController.text;
+                                  SigninAccount();
+                                  }
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 1,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("New user?",style: TextStyle(color: Colors.black,fontSize: 14),),
+                              TextButton(onPressed: (){Navigator.push(
+                                  context,
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) => const Register(),
+                                    ),);}, child: Text("Sign Up",style: TextStyle(color: Colors.white,fontSize: 14,fontWeight: FontWeight.bold),))
+                            ],
+                          ),
+               
+                          
+              ],),
+              ),
              ),
             ],
         ),
